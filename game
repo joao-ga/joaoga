@@ -1,0 +1,96 @@
+import pygame
+from random import randint
+
+pygame.init()
+
+pos_x_jogador = 600  # min 295  max 925
+pos_y_jogador = 15
+pos_x = 400
+pos_y = randint(800, 1000)
+p2_x = 800
+p2_y = randint(1200, 2000)
+p3_y = randint(2200, 3000)
+timer = 0
+tempo_segundo = 0
+
+velocidade = 30
+velocidade_all = 20
+
+fundo = pygame.image.load('fundo.png')
+carro_jogador = pygame.image.load('vaso.jpeg')
+carro_oponente_esquerda = pygame.image.load('c5r.png')
+carro_oponente_centro = pygame.image.load('a8r.png')
+carro_oponente_direita = pygame.image.load('c3r.png')
+game_over = pygame.image.load('game_over.png')
+
+font = pygame.font.SysFont('arial white', 30)
+texto = font.render('Time:  ', True, (255, 255, 255), (0, 170, 0))
+pos_texto = texto.get_rect()
+pos_texto.center = (65, 30)
+
+janela = pygame.display.set_mode((1280, 720))
+pygame.display.set_caption('Criando um jogo')
+
+janela_aberta = True
+colisao = False
+while janela_aberta:
+    pygame.time.delay(50)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            janela_aberta = False
+
+    comandos = pygame.key.get_pressed()
+
+    if comandos[pygame.K_RIGHT] and pos_x_jogador <= 910:
+        pos_x_jogador += velocidade
+    if comandos[pygame.K_LEFT] and pos_x_jogador >= 310:
+        pos_x_jogador -= velocidade
+
+    # detecta colisão
+    if pos_x_jogador + 135 > p2_x and pos_y_jogador + 129 > p2_y:  # colisão carro da direita
+        colisao = True
+        pos_y_jogador = 1300
+
+    if pos_x_jogador - 120 < pos_x and pos_y_jogador + 64 > pos_y:  # colisão carro da esquerda
+        colisao = True
+        pos_y_jogador = 1300
+
+    print(pos_x_jogador)
+    if (pos_x_jogador + 120 > pos_x - 200 and pos_y_jogador + 10 > p3_y) and (
+            pos_x_jogador - 120 < pos_x - 200 and pos_y_jogador + 10 > p3_y):
+        colisao = True
+        pos_y_jogador = 1300
+
+    if pos_y <= -80:
+        pos_y = randint(800, 1000)  # posição branco
+
+    if p2_y <= -80:
+        p2_y = randint(1200, 2000)  # posição ambulancia
+
+    if p3_y <= -80:
+        p3_y = randint(2200, 3000)  # posição amarelo
+
+    # tempo
+    if timer < 20:
+        timer += 1
+    else:
+        tempo_segundo += 1
+        texto = font.render('Time:  ' + str(tempo_segundo), True, (255, 255, 255), (0, 170, 0))
+        timer = 0
+    pos_y -= velocidade_all + 5  # carro branco
+    p2_y -= velocidade_all + 10  # ambulancia
+    p3_y -= velocidade_all  # carro amarelo
+
+    janela.blit(fundo, (0, 0))
+    janela.blit(carro_jogador, (pos_x_jogador, pos_y_jogador))
+    janela.blit(carro_oponente_esquerda, (pos_x, pos_y))
+    janela.blit(carro_oponente_centro, (p2_x, p2_y))
+    janela.blit(carro_oponente_direita, (pos_x + 200, p3_y))
+    janela.blit(texto, pos_texto)
+    if colisao:
+        janela.blit(game_over, (450, 100))
+
+    pygame.display.update()
+
+pygame.quit()
